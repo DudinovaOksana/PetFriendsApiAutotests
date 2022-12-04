@@ -1,5 +1,5 @@
 from api import PetFriends
-from settings import valid_email, invalid_email, valid_password, invalid_password
+from settings import valid_email, invalid_email, valid_password
 
 pf = PetFriends()
 
@@ -101,7 +101,7 @@ def test_create_pet_without_photo_without_animal_type_field():
     assert status == 400
 
 
-# проверяем выдаст ли система ошибку при создании животного без фото при отсуствии с некорректным auth-key
+# проверяем выдаст ли система ошибку при создании животного без фото при отсутствии с некорректным auth-key
 def test_create_pet_without_photo_with_invalid_auth_key():
     age = "2"
     name = "Mark"
