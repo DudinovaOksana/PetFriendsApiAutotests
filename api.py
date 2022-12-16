@@ -15,7 +15,6 @@ class PetFriends:
         res = requests.get(self.base_url+'api/key', headers=headers)
         status = res.status_code
         try:
-            #сразу возвращаем ключ
             result = res.json()['key']
         except:
             result = res.text
