@@ -1,6 +1,5 @@
 from api import PetFriends
-from settings import valid_email, invalid_email, valid_password
-
+from settings import *
 pf = PetFriends()
 
 
@@ -8,7 +7,7 @@ pf = PetFriends()
 def test_get_api_key_for_valid_user(email=valid_email, password=valid_password):
     status, result = pf.get_api_key(email, password)
     assert status == 200
-    assert 'key' in result
+    print(result)
 
 
 #проверяем можно ли получить список всех животных  с корректными данными
@@ -49,9 +48,9 @@ def test_create_pet_with_photo():
     age = "1"
     name = "Anton"
     type = "python"
-    photo = "D:\PycharmProjects\PetFriendsApiAutotests\images\8077.750.png"
+    photo = "D:\PycharmProjects\PetFriendsApiAutotests\images\8077750.png"
     _, auth_key = pf.get_api_key(valid_email, valid_password)
-    status, result = pf.add_new_pet_with_photo(auth_key, name, type, age, photo)
+    status, result, response_head = pf.add_new_pet_with_photo(auth_key, name, type, age, photo)
     assert status == 200
     assert result['age'] == age
     assert result['name'] == name
@@ -67,7 +66,7 @@ def test_sucsessful_update_pet_info():
     _, auth_key = pf.get_api_key(valid_email, valid_password)
     _, my_pets = pf.get_list_of_pets(auth_key, "my_pets")
     if len(my_pets['pets']) > 0:
-        status, result = pf.change_pet(auth_key, my_pets['pets'][0]['id'], name, animal_type, age)
+        status, result, _ = pf.change_pet(auth_key, my_pets['pets'][0]['id'], name, animal_type, age)
         assert status == 200
         assert result['name'] == name
     else:
@@ -79,10 +78,10 @@ def test_sucessful_delete_pet():
     age = "1"
     name = "Yura_1"
     type = "python"
-    photo = "D:\PycharmProjects\PetFriendsApiAutotests\images\8077.750.png"
+    photo = "D:\PycharmProjects\PetFriendsApiAutotests\images\8077750.png"
     _, auth_key = pf.get_api_key(valid_email, valid_password)
-    status, result = pf.add_new_pet_with_photo(auth_key, name, type, age, photo)
-    status_delete, result_delete = pf.delete_pet(auth_key, result["id"])
+    status, result, response_head = pf.add_new_pet_with_photo(auth_key, name, type, age, photo)
+    status_delete, result_delete, response_head = pf.delete_pet(auth_key, result["id"])
     assert status_delete == 200
 
 
@@ -106,18 +105,19 @@ def test_create_pet_without_photo_with_invalid_auth_key():
     age = "2"
     name = "Mark"
     animal_type = "Медведь"
-    status, result = pf.add_new_pet_simple_without_photo(auth_key={'key': 'incorrect_key'}, name=name, animal_type=animal_type, age=age)
+    status, result = pf.add_new_pet_simple_without_photo('incorrect_key', name=name, animal_type=animal_type, age=age)
     assert status == 403
 
 
 # проверяем можно ли создать питомца с фото, где вместо фото загружен текстовый файл
+#тестом выявлен баг
 def test_create_pet_with_invalid_photo():
     age = "3"
     name = "Michelle"
     type = "cat"
     pet_photo = "D:\\PycharmProjects\\PetFriendsApiAutotests\\images\\photo.txt"
     _, auth_key = pf.get_api_key(valid_email, valid_password)
-    status, result = pf.add_new_pet_with_photo(auth_key, name, type, age, pet_photo)
+    status, result, response_head = pf.add_new_pet_with_photo(auth_key, name, type, age, pet_photo)
     assert status == 400
 
 
@@ -126,13 +126,14 @@ def test_create_pet_with_photo_with_invalid_auth_key():
     age = "2"
     name = "John"
     type = "cobra"
-    photo = "D:\PycharmProjects\PetFriendsApiAutotests\images\8077.750.png"
+    photo = "D:\PycharmProjects\PetFriendsApiAutotests\images\8077750.png"
     _, auth_key = pf.get_api_key(valid_email, valid_password)
-    status, result = pf.add_new_pet_with_photo(auth_key={'key': 'incorrect_key'}, name=name, animal_type=type, age=age, pet_photo=photo)
+    status, result, response_head = pf.add_new_pet_with_photo('incorrect_key', name=name, animal_type=type, age=age, pet_photo=photo)
     assert status == 403
 
 
 # проверяем можно ли добавить фото питомца с некорректным auth-key
+#тест выявил баг
 def test_add_pet_photo_invalid_auth_key():
     age = "3"
     name = "Yan"
@@ -140,14 +141,14 @@ def test_add_pet_photo_invalid_auth_key():
     _, auth_key = pf.get_api_key(valid_email, valid_password)
     status, result = pf.add_new_pet_simple_without_photo(auth_key, name, type, age)
     pet_photo = "D:\\PycharmProjects\\PetFriendsApiAutotests\\images\\1575050853qqw.gif"
-    status, result = pf.set_pet_photo(auth_key={'key': 'incorrect_key'}, pet_id=result["id"], pet_photo=pet_photo)
+    status, result = pf.set_pet_photo('incorrect_key', pet_id=result["id"], pet_photo=pet_photo)
     assert status == 403
 
 
 # проверяем можно ли получить список питомцев с некорректным ключом
 def test_get_all_pets_with_invalid_key():
     _, auth_key = pf.get_api_key(valid_email, valid_password)
-    status, result = pf.get_list_of_pets(auth_key={'key': 'incorrect_key'}, filter="")
+    status, result = pf.get_list_of_pets('incorrect_key', filter="")
     assert status == 403
 
 
@@ -156,10 +157,10 @@ def test_delete_pet_with_invalid_auth_key():
     age = "2"
     name = "Yura_2"
     type = "python"
-    photo = "D:\PycharmProjects\PetFriendsApiAutotests\images\8077.750.png"
+    photo = "D:\PycharmProjects\PetFriendsApiAutotests\images\8077750.png"
     _, auth_key = pf.get_api_key(valid_email, valid_password)
-    status, result = pf.add_new_pet_with_photo(auth_key, name, type, age, photo)
-    new_status, new_result = pf.delete_pet(auth_key={'key': 'incorrect_key'}, pet_id=result["id"])
+    status, result, response_head = pf.add_new_pet_with_photo(auth_key, name, type, age, photo)
+    new_status, new_result, new_response_head = pf.delete_pet('incorrect_key', pet_id=result["id"])
     assert new_status == 403
 
 
@@ -170,7 +171,7 @@ def test_update_pet_info_with_invalid_data():
     animal_type = "Elefant"
     _, auth_key = pf.get_api_key(valid_email, valid_password)
     _, my_pets = pf.get_list_of_pets(auth_key, "my_pets")
-    status, result = pf.change_pet(auth_key, "ID_DOESN'T_EXIST", name, animal_type, age)
+    status, result, response_head = pf.change_pet(auth_key, "ID_DOESN'T_EXIST", name, animal_type, age)
     assert status == 400
 
 
@@ -181,5 +182,5 @@ def test_update_pet_info_with_invalid_auth_key():
     animal_type = "Elefant"
     _, auth_key = pf.get_api_key(valid_email, valid_password)
     _, my_pets = pf.get_list_of_pets(auth_key, "my_pets")
-    status, result = pf.change_pet(auth_key={'key': '12345'}, pet_id=my_pets['pets'][0]['id'], name=name, animal_type=animal_type, age=age)
+    status, result, response_head = pf.change_pet('1234', pet_id=my_pets['pets'][0]['id'], name=name, animal_type=animal_type, age=age)
     assert status == 403
