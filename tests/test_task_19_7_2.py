@@ -148,7 +148,7 @@ def test_add_pet_photo_invalid_auth_key():
 # проверяем можно ли получить список питомцев с некорректным ключом
 def test_get_all_pets_with_invalid_key():
     _, auth_key = pf.get_api_key(valid_email, valid_password)
-    status, result = pf.get_list_of_pets('incorrect_key', filter="")
+    status, result = pf.get_list_of_pets('incorrect_key', filter="my_pets")
     assert status == 403
 
 
